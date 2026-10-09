@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para mi amor</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            /* Paleta de colores */
+            --bg-color: #fdfbf7;
+            --card-bg: #ffffff;
+            --text-main: #3d3b3a;
+            --text-muted: #888582;
+            --accent-color: #e88b8b;
+            --accent-dark: #d96b6b;
+            --accent-light: #f7d4d4;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+            
+            /* Tipografía */
+            --font-title: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            
+            /* Bordes */
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            /* Fondo sutil */
+            background-image: radial-gradient(var(--accent-light) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px; /* Tamaño móvil ideal / tablet */
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Tipografía y Encabezados */
+        h1, h2, h3 {
+            font-family: var(--font-title);
+            color: var(--text-main);
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            color: var(--accent-dark);
+        }
+
+        .ampersand {
+            color: var(--accent-color);
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            vertical-align: middle;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Tarjetas (Cards) */
+        .card {
+            background: transparent;
+            padding: 20px 15px;
+            margin-bottom: 35px;
+            border: none;
+            box-shadow: none;
+            border-bottom: 1px dashed rgba(232, 139, 139, 0.4);
+        }
+        .card:last-of-type, #proposal-container {
+            border-bottom: none;
+        }
+
+        /* Imágenes y Medios */
+        .photo-frame {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 10px;
+            border: 6px solid white;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+            aspect-ratio: 4/5;
+        }
+
+        .rounded-img {
+            border-radius: var(--border-radius);
+            width: 100%;
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            aspect-ratio: 16/9;
+        }
+
+        /* Botones */
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            display: inline-block;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(232, 139, 139, 0.3);
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(217, 107, 107, 0.4);
+        }
+
+        .btn:disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Contador */
+        .date-counter {
+            text-align: center;
+        }
+        .date-counter .big-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-dark);
+            margin-bottom: 8px;
+        }
+        .date-counter .small-text {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            background: #faf8f5;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        /* Audio */
+        .audio-container {
+            margin-top: 15px;
+            text-align: center;
+        }
+        audio {
+            width: 100%;
+            height: 40px;
+            outline: none;
+            border-radius: 20px;
+        }
+
+        /* Carta colapsable */
+        .letter-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease-in-out, opacity 0.6s ease-in-out, margin 0.6s ease;
+            opacity: 0;
+            text-align: center;
+            font-style: italic;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        .letter-content.expanded {
+            max-height: 800px;
+            opacity: 1;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Listas de virtudes */
+        .virtues-list {
+            list-style: none;
+            padding: 0 10px;
+            margin: 15px auto 0 auto;
+            max-width: 380px;
+        }
+        .virtues-list li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        .virtues-list li::before {
+            content: '♥';
+            color: var(--accent-color);
+            position: absolute;
+            left: 0;
+            font-size: 1.1rem;
+            top: -2px;
+        }
+
+        /* Lista de Deseos (Checkboxes) */
+        .bucket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 10px;
+            margin: 0 auto;
+            max-width: 380px;
+        }
+        .bucket-list label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .bucket-list input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            min-width: 22px;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--accent-color);
+            border-radius: 6px;
+            margin-right: 12px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-top: 2px;
+        }
+        .bucket-list input[type="checkbox"]:checked {
+            background-color: var(--accent-color);
+        }
+        .bucket-list input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .bucket-list input[type="checkbox"]:checked + span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        /* Vales de Amor */
+        .coupon {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px dashed var(--accent-light);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background-color: #fffaf9;
+            transition: opacity 0.3s;
+        }
+        .coupon span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            flex: 1;
+            padding-right: 10px;
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-family: var(--font-body);
+            font-weight: 600;
+        }
+        .btn-sm:hover:not(:disabled) {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+        .btn-sm:disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+            cursor: default;
+        }
+        .coupon.redeemed {
+            border-color: #e0e0e0;
+            background-color: #fafafa;
+        }
+        .coupon.redeemed span {
+            color: var(--text-muted);
+        }
+
+        /* Ruleta */
+        .roulette-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto 20px auto;
+        }
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            color: var(--accent-dark);
+            z-index: 10;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #roulette-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.2, 1);
+            border: 3px solid white;
+        }
+        .result-text {
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--accent-dark);
+            min-height: 28px;
+        }
+
+        /* Carrusel y Flip Cards */
+        .carousel-card {
+            padding: 25px 0;
+            overflow: hidden;
+        }
+        .carousel-card h2 {
+            margin-bottom: 5px;
+        }
+        .carousel-track {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            gap: 15px;
+            padding: 10px 20px 30px 20px;
+            scrollbar-width: none; 
+        }
+        .carousel-track::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel-slide {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            perspective: 1000px;
+        }
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            aspect-ratio: 3/4;
+            perspective: 1000px;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            outline: 1px solid transparent;
+        }
+        .flip-card-front {
+            padding: 12px 12px 60px 12px;
+            transform: rotateY(0deg) translateZ(1px);
+        }
+        .polaroid-img-container {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        .polaroid-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .polaroid-caption {
+            position: absolute;
+            bottom: 25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-family: var(--font-title);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+            transform: translateZ(1px);
+        }
+        .btn-flip {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(2px);
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .flip-card-back {
+            transform: rotateY(180deg) translateZ(1px);
+            background: #fff9f9;
+            padding: 30px;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed var(--accent-light);
+        }
+        .flip-card-back p {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-style: italic;
+            font-family: var(--font-title);
+            line-height: 1.6;
+        }
+        .scroll-indicator {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Propuesta Interactiva */
+        .proposal-card {
+            position: relative;
+            padding-bottom: 40px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .buttons-container {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        #btn-yes, #btn-no {
+            width: 110px;
+            z-index: 10;
+            font-size: 1.1rem;
+        }
+        #btn-no {
+            background-color: #ffffff;
+            color: var(--accent-dark);
+            border: 2px solid var(--accent-light);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: var(--font-body);
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: top 0.2s ease, left 0.2s ease, background-color 0.3s, transform 0.2s;
+        }
+        #btn-no:hover {
+            background-color: var(--accent-light);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .success-msg {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--accent-dark);
+            font-family: var(--font-title);
+            margin-top: 20px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 20px;
+            padding-bottom: 40px;
+        }
+        .footer-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+        .signature {
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* 12. Animación de corazones cayendo */
+        .falling-heart {
+            position: fixed;
+            top: -10vh;
+            font-size: 1.2rem;
+            z-index: -1;
+            pointer-events: none;
+            animation: fall linear forwards;
+            opacity: 0.6;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        /* 13. Modo Noche Estrellada */
+        body.dark-mode {
+            --bg-color: #13141c;
+            --text-main: #fdfbf7;
+            --text-muted: #a3a3b5;
+            --accent-dark: #ffb6b9;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px);
+            background-color: var(--bg-color);
+        }
+        body.dark-mode .polaroid-caption, body.dark-mode .flip-card-back p, body.dark-mode .flip-card-back .btn-flip {
+            color: #3d3b3a; /* Mantener fotos originales */
+        }
+        body.dark-mode .coupon {
+            background-color: #1e1f2b;
+            border-color: #ffb6b9;
+        }
+        
+        /* 14. Botones Flotantes y Modal */
+        .floating-btn-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        .btn-floating {
+            background-color: #ffffff;
+            color: var(--accent-dark);
+            border: 2px solid var(--accent-color);
+            border-radius: 50px;
+            padding: 10px 15px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        body.dark-mode .btn-floating {
+            background-color: #1e1f2b;
+        }
+        .btn-floating:hover {
+            transform: scale(1.05);
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 320px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--accent-color);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* 15. Raspadita */
+        .scratch-container {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background-color: #fff;
+            border: 2px dashed var(--accent-color);
+            /* Importante para no scrollear al raspar en móvil */
+            touch-action: none;
+        }
+        .scratch-prize {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #fffaf9, #ffe5e5);
+            color: var(--accent-dark);
+            z-index: 1;
+        }
+        .scratch-prize h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .scratch-prize p {
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+        }
+        #scratchCanvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- 1. Encabezado -->
+    <header class="text-center">
+        <h1>Tatiana <span class="ampersand">&</span> Francisco</h1>
+        
+        <!-- Recuerdo 1 en el encabezado -->
+        <div style="max-width: 320px; margin: 20px auto; transform: rotate(-2deg);">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <div class="polaroid-img-container">
+                            <img src="21%20de%20septiembre.jpeg" alt="21 de septiembre">
+                        </div>
+                        <div class="polaroid-caption">21 de Septiembre</div>
+                        <button class="btn-sm btn-flip" onclick="this.closest('.flip-card').classList.toggle('flipped')">Girar ↺</button>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>"El día que te pedí que fueras mi novia. Recuerdo que estaba tan nervioso que las manos me temblaban sin parar, ¡pero sin duda fue uno de los días más felices!"</p>
+                        <button class="btn-sm btn-flip" onclick="this.closest('.flip-card').classList.toggle('flipped')">Volver ↺</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Contador en Tiempo Real -->
+    <section class="card">
+        <h2>Juntos desde hace...</h2>
+        <div class="date-counter">
+            <div class="big-text">
+                <span id="years">0</span> años, 
+                <span id="months">0</span> meses, 
+                <span id="days">0</span> días
+            </div>
+            <div class="small-text">
+                <span id="hours">00</span>h 
+                <span id="minutes">00</span>m 
+                <span id="seconds">00</span>s
+            </div>
+        </div>
+    </section>
+
+    <!-- Recuerdo 2 (reemplazando el carrusel para intercalar fotos) -->
+    <section style="padding: 10px 0 30px 0;">
+        <h2 class="text-center" style="margin-bottom: 20px; color: var(--accent-dark); font-size: 1.8rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.05);">Un Recuerdo Inolvidable</h2>
+        <div style="max-width: 320px; margin: 0 auto; transform: rotate(3deg);">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <div class="polaroid-img-container">
+                            <img src="24%20de%20septiembre.jpeg" alt="24 de septiembre">
+                        </div>
+                        <div class="polaroid-caption">24 de Septiembre</div>
+                        <button class="btn-sm btn-flip" onclick="this.closest('.flip-card').classList.toggle('flipped')">Girar ↺</button>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>"El día que conocí a tus amigos. Aunque me puse tan nervioso que me fui sin saludarlos bien... la pasé excelente compartiendo ese rato contigo."</p>
+                        <button class="btn-sm btn-flip" onclick="this.closest('.flip-card').classList.toggle('flipped')">Volver ↺</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Carta de Amor Colapsable -->
+    <section class="card text-center">
+        <h2>Para ti...</h2>
+        <div class="letter-content" id="letter-content">
+            <!-- REEMPLAZAR TEXTO: Escribe tu dedicatoria personal aquí -->
+            <p>
+            Mi amor,<br><br>
+            Desde el momento en que llegaste a mi vida, todo cambió para mejor. Quería hacer algo especial para recordarte lo mucho que significas para mí y lo feliz que me haces cada día.<br><br>
+            Eres mi refugio, mi mayor aventura y mi lugar favorito en el mundo. Gracias por tantas risas, aprendizajes y momentos inolvidables.<br><br>
+            Te amo inmensamente, hoy y siempre. ❤️
+            </p>
+        </div>
+        <button class="btn" id="btn-letter">Leer carta 💌</button>
+    </section>
+
+    <!-- 5. Lo que más amo de ti -->
+    <section class="card">
+        <h2>Lo que más amo de ti</h2>
+        <!-- REEMPLAZAR TEXTO: Lista las virtudes y cosas que amas -->
+        <ul class="virtues-list">
+            <li>Tu sonrisa que ilumina mis días más oscuros.</li>
+            <li>La forma en la que me miras.</li>
+            <li>Tu paciencia infinita y tu corazón de oro.</li>
+            <li>Cuando nos reimos de cosas sin sentido.</li>
+            <li>Lo mucho que me inspiras a ser una mejor persona.</li>
+        </ul>
+    </section>
+
+    <!-- 7. Lista de Deseos (Bucket List) -->
+    <section class="card">
+        <h2>Nuestra Lista</h2>
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Aventuras por vivir juntos</p>
+        <div class="bucket-list">
+            <!-- REEMPLAZAR TEXTOS: Metas y deseos para el futuro -->
+            <label><input type="checkbox"> <span>Despertar por la mañana juntos</span></label>
+            <label><input type="checkbox"> <span>Escaparnos unos dias a cualquier lugar</span></label>
+            <label><input type="checkbox"> <span>Hacer un maratón de nuestras películas favoritas</span></label>
+            <label><input type="checkbox"> <span>Cocinar una receta difícil sin quemar la cocina</span></label>
+            <label><input type="checkbox"> <span>Seguir cumpliendo metas juntos</span></label>
+        </div>
+    </section>
+
+    <!-- Recuerdo 3 (intercalado antes de los vales) -->
+    <section style="padding: 10px 0 30px 0;">
+        <h2 class="text-center" style="margin-bottom: 20px; color: var(--accent-dark); font-size: 1.8rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.05);">Momentos Mágicos</h2>
+        <div style="max-width: 320px; margin: 0 auto; transform: rotate(-1.5deg);">
+            <div class="flip-card">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <div class="polaroid-img-container">
+                            <img src="05%20de%20octubre.jpeg" alt="05 de octubre">
+                        </div>
+                        <div class="polaroid-caption">05 de Octubre</div>
+                        <button class="btn-sm btn-flip" onclick="this.closest('.flip-card').classList.toggle('flipped')">Girar ↺</button>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>"Cualquier momento a tu lado se vuelve un recuerdo perfecto. Me encanta cómo siempre encuentro una nueva razón para enamorarme más de ti."</p>
+                        <button class="btn-sm btn-flip" onclick="this.closest('.flip-card').classList.toggle('flipped')">Volver ↺</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. Vales de Amor Canjeables -->
+    <section class="card">
+        <h2>Vales de Amor</h2>
+        <p style="text-align: center; margin-bottom: 15px; font-size: 0.85rem; color: var(--text-muted);">Úsalos sabiamente 😉</p>
+        
+        <!-- REEMPLAZAR TEXTOS: Personaliza los premios de los vales -->
+        <div class="coupon">
+            <span>Vale por unas empanaditas</span>
+            <button class="btn-sm btn-redeem">Canjear</button>
+        </div>
+        <div class="coupon">
+            <span>Vale por un rico masaje</span>
+            <button class="btn-sm btn-redeem">Canjear</button>
+        </div>
+        <div class="coupon">
+            <span>Vale por un rico helado </span>
+            <button class="btn-sm btn-redeem">Canjear</button>
+        </div>
+        <div class="coupon">
+            <span>Vale por una salida de compras</span>
+            <button class="btn-sm btn-redeem">Canjear</button>
+        </div>
+        <div class="coupon">
+            <span>Vale por una cena pagada por mí</span>
+            <button class="btn-sm btn-redeem">Canjear</button>
+        </div>
+    </section>
+
+    <!-- 9. Raspadita Sorpresa -->
+    <section style="padding: 10px 0 30px 0; border-bottom: 1px dashed rgba(232, 139, 139, 0.4); margin-bottom: 35px;">
+        <h2 class="text-center" style="margin-bottom: 10px; color: var(--accent-dark); font-size: 1.8rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.05);">Premio Sorpresa</h2>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Raspa el panel plateado con tu dedo</p>
+        
+        <div class="scratch-container">
+            <!-- El premio escondido -->
+            <div class="scratch-prize">
+                <h3>👑 ¡Tu Premio! 👑</h3>
+                <p id="scratch-prize-text">Cargando premio...</p>
+                <button id="btn-reset-scratch" class="btn-sm" style="margin-top: 15px; display: none; padding: 5px 10px; font-size: 0.8rem;">Raspar de nuevo ↺</button>
+            </div>
+            <!-- El lienzo que se raspa -->
+            <canvas id="scratchCanvas" width="300" height="150"></canvas>
+        </div>
+    </section>
+
+    <!-- 10. Propuesta Interactiva -->
+    <section class="card proposal-card" id="proposal-container">
+        <!-- REEMPLAZAR TEXTO: Pregunta final -->
+        <h2 id="proposal-title">Cenamos juntos?</h2>
+        <div class="buttons-container" id="proposal-buttons">
+            <button class="btn" id="btn-yes">Sí</button>
+            <button class="btn-no" id="btn-no">No</button>
+        </div>
+        <div class="success-msg" id="success-msg">¡Es una cita! ❤️</div>
+    </section>
+
+    <!-- 11. Pie de Página -->
+    <footer class="text-center">
+        <p class="signature">Con todo mi amor, Francisco</p>
+    </footer>
+
+</div>
+
+<!-- Floating Buttons -->
+<div class="floating-btn-container">
+    <button class="btn-floating" id="btn-darkmode">🌙 Modo Noche</button>
+    <button class="btn-floating" id="btn-missme">❤️ Presiona si me extrañas</button>
+</div>
+
+<!-- Modal Random -->
+<div class="modal-overlay" id="missme-modal">
+    <div class="modal-content">
+        <h2 style="font-size: 1.4rem; margin-bottom: 15px; color: var(--accent-dark);">Para ti...</h2>
+        <p id="missme-text" style="margin-bottom: 20px; font-style: italic; font-size: 1.1rem;"></p>
+        <button class="btn-sm" style="margin: 0 auto; display: block;" onclick="document.getElementById('missme-modal').classList.remove('active')">Cerrar</button>
+    </div>
+</div>
+
+<!-- Leaflet JS (Para el mapa) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script>
+    /* =========================================
+       1. CONTADOR DE TIEMPO
+       ========================================= */
+    // Configura la fecha de inicio de su relación
+    const startDate = new Date('2026-09-21T13:00:00');
+
+    function updateCounter() {
+        const now = new Date();
+        
+        let years = now.getFullYear() - startDate.getFullYear();
+        let months = now.getMonth() - startDate.getMonth();
+        let days = now.getDate() - startDate.getDate();
+        
+        if (days < 0) {
+            months--;
+            const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+            days += prevMonth.getDate();
+        }
+        
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        document.getElementById('years').textContent = years;
+        document.getElementById('months').textContent = months;
+        document.getElementById('days').textContent = days;
+        document.getElementById('hours').textContent = hours;
+        document.getElementById('minutes').textContent = minutes;
+        document.getElementById('seconds').textContent = seconds;
+    }
+
+    setInterval(updateCounter, 1000);
+    updateCounter();
+
+    /* =========================================
+       2. CARTA COLAPSABLE
+       ========================================= */
+    const btnLetter = document.getElementById('btn-letter');
+    const letterContent = document.getElementById('letter-content');
+    let isLetterOpen = false;
+
+    btnLetter.addEventListener('click', () => {
+        isLetterOpen = !isLetterOpen;
+        if (isLetterOpen) {
+            letterContent.classList.add('expanded');
+            btnLetter.textContent = 'Cerrar carta 💌';
+        } else {
+            letterContent.classList.remove('expanded');
+            btnLetter.textContent = 'Leer carta 💌';
+        }
+    });
+
+    /* =========================================
+       4. VALES DE AMOR
+       ========================================= */
+    // Aquí puse el número que intentaste ingresar. (Si eres de Argentina, por lo general WhatsApp requiere que lleve el 549 adelante, quedaría "5493816338522")
+    const miNumeroWhatsApp = "5493816338522"; 
+
+    const btnRedeems = document.querySelectorAll('.btn-redeem');
+    
+    btnRedeems.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // 1. Obtener el texto del vale que apretaron
+            const nombreVale = btn.previousElementSibling.textContent;
+
+            // 2. Abrir WhatsApp en otra pestaña con un mensaje pre-armado
+            const mensaje = encodeURIComponent(`Hola mi amor ❤️, vengo a canjear mi: ${nombreVale}`);
+            window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensaje}`, '_blank');
+
+            // 3. Animación de confeti desde el botón
+            const rect = btn.getBoundingClientRect();
+            const x = (rect.left + rect.width / 2) / window.innerWidth;
+            const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+            confetti({
+                particleCount: 60,
+                spread: 60,
+                origin: { x: x, y: y },
+                colors: ['#e88b8b', '#ffffff', '#ffb6b9'],
+                disableForReducedMotion: true
+            });
+
+            // 4. Cambiar estado visual del vale
+            btn.textContent = 'Canjeado ✓';
+            btn.disabled = true;
+            btn.closest('.coupon').classList.add('redeemed');
+        });
+    });
+
+    /* =========================================
+       6. PROPUESTA INTERACTIVA (BOTÓN NO EVASIVO)
+       ========================================= */
+    const btnNo = document.getElementById('btn-no');
+    const btnYes = document.getElementById('btn-yes');
+    const proposalCard = document.getElementById('proposal-container');
+    const buttonsContainer = document.getElementById('proposal-buttons');
+    const proposalTitle = document.getElementById('proposal-title');
+    const successMsg = document.getElementById('success-msg');
+
+    const moveNoBtn = (e) => {
+        // Prevenir comportamiento por defecto si se presiona o toca
+        if(e && e.type !== 'mouseenter') e.preventDefault();
+        
+        // Mover el botón al nivel de la tarjeta para que las coordenadas (left, top) funcionen bien
+        if (btnNo.parentElement !== proposalCard) {
+            proposalCard.appendChild(btnNo);
+            btnNo.style.position = 'absolute';
+            // Al sacar el botón, forzamos un redibujado rápido para evitar saltos raros
+            btnNo.getBoundingClientRect(); 
+        }
+
+        const cardRect = proposalCard.getBoundingClientRect();
+        const btnRect = btnNo.getBoundingClientRect();
+        
+        // Mantener dentro de los límites de la tarjeta con margen
+        const maxLeft = Math.max(0, cardRect.width - btnRect.width - 20);
+        const maxTop = Math.max(0, cardRect.height - btnRect.height - 20);
+
+        // Calcular posición aleatoria
+        const randomLeft = Math.max(10, Math.floor(Math.random() * maxLeft));
+        const randomTop = Math.max(10, Math.floor(Math.random() * maxTop));
+
+        // Aplicar nuevas coordenadas
+        btnNo.style.left = `${randomLeft}px`;
+        btnNo.style.top = `${randomTop}px`;
+    };
+
+    // Eventos para móvil y escritorio
+    btnNo.addEventListener('mouseenter', moveNoBtn);
+    btnNo.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Evitar click accidental en móvil
+        moveNoBtn();
+    }, { passive: false });
+    btnNo.addEventListener('click', moveNoBtn); // Por si logran hacerle click
+
+    // Acción al presionar SÍ
+    btnYes.addEventListener('click', () => {
+        // Ocultar botones y pregunta
+        buttonsContainer.style.display = 'none';
+        proposalTitle.style.display = 'none';
+        
+        // Mostrar mensaje de éxito
+        successMsg.style.display = 'block';
+
+        // Gran explosión de confeti de pantalla completa
+        const duration = 3 * 1000;
+        const end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 8,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#e88b8b', '#d96b6b', '#ffffff']
+            });
+            confetti({
+                particleCount: 8,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#e88b8b', '#d96b6b', '#ffffff']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    });
+
+    /* =========================================
+       7. LLUVIA DE CORAZONES
+       ========================================= */
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.classList.add('falling-heart');
+        heart.textContent = Math.random() > 0.5 ? '❤️' : '✨';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = Math.random() * 3 + 4 + 's'; // 4 a 7 segundos
+        heart.style.fontSize = Math.random() * 10 + 10 + 'px';
+        document.body.appendChild(heart);
+        
+        setTimeout(() => {
+            heart.remove();
+        }, 7000);
+    }
+    setInterval(createHeart, 1000); // Un corazón cada segundo
+
+    /* =========================================
+       8. MODO NOCHE ESTRELLADA
+       ========================================= */
+    const btnDarkMode = document.getElementById('btn-darkmode');
+    btnDarkMode.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        if (document.body.classList.contains('dark-mode')) {
+            btnDarkMode.innerHTML = '☀️ Modo Día';
+        } else {
+            btnDarkMode.innerHTML = '🌙 Modo Noche';
+        }
+    });
+
+    /* =========================================
+       9. BOTÓN SI ME EXTRAÑAS
+       ========================================= */
+    const btnMissMe = document.getElementById('btn-missme');
+    const modalMissMe = document.getElementById('missme-modal');
+    const missMeText = document.getElementById('missme-text');
+    
+    const frasesAmor = [
+        "Esa sonrisa tuya es mi lugar favorito en el mundo.",
+        "No importa qué tan malo sea mi día, hablar contigo lo arregla todo.",
+        "Amo lo inteligentes y hermosas que son nuestras conversaciones.",
+        "Cada vez que veo una notificación tuya, se me dibuja una sonrisa.",
+        "Eres la casualidad más bonita que llegó a mi vida.",
+        "¡Te extraño un montón! Ojalá estuvieras aquí para darte un buen abrazo.",
+        "¿Ya te dije hoy lo hermosa que estás?",
+        "Haces que hasta las cosas más simples a tu lado sean perfectas."
+    ];
+
+    btnMissMe.addEventListener('click', () => {
+        const fraseAleatoria = frasesAmor[Math.floor(Math.random() * frasesAmor.length)];
+        missMeText.textContent = `"${fraseAleatoria}"`;
+        modalMissMe.classList.add('active');
+        
+        confetti({
+            particleCount: 40,
+            spread: 50,
+            origin: { y: 0.6 },
+            colors: ['#e88b8b', '#ffffff', '#ffb6b9']
+        });
+    });
+
+    /* =========================================
+       10. RASPADITA (SCRATCH CARD)
+       ========================================= */
+    const canvas = document.getElementById('scratchCanvas');
+    const prizeText = document.getElementById('scratch-prize-text');
+    const btnResetScratch = document.getElementById('btn-reset-scratch');
+    
+    const premiosRaspadita = [
+        "Un beso infinito y abrazos largos.",
+        "Un vale por una cena hecha por mí.",
+        "Una cita a donde tú elijas ir.",
+        "Un masaje relajante de 30 minutos.",
+        "Un helado gigante de tu sabor favorito.",
+        "Maratón de películas con muchos mimos."
+    ];
+
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let isRevealed = false;
+
+        function initScratchCard() {
+            // Seleccionar premio al azar
+            prizeText.textContent = premiosRaspadita[Math.floor(Math.random() * premiosRaspadita.length)];
+            
+            // Reiniciar estado visual del canvas y botón
+            canvas.style.transition = 'none';
+            canvas.style.opacity = '1';
+            canvas.style.display = 'block';
+            btnResetScratch.style.display = 'none';
+            isRevealed = false;
+            
+            // Dibujar capa gris inicial
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = '#b5b5b5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Texto de "Raspa aquí"
+            ctx.fillStyle = '#888888';
+            ctx.font = '700 24px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText('¡RASPA AQUÍ!', canvas.width / 2, canvas.height / 2 + 8);
+        }
+
+        // Inicializar la primera vez
+        initScratchCard();
+        
+        // Escuchar al botón de reinicio
+        btnResetScratch.addEventListener('click', initScratchCard);
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            scratch(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            checkReveal();
+        }
+
+        function scratch(e) {
+            if (!isDrawing || isRevealed) return;
+            if (e.cancelable) e.preventDefault(); // Evitar scroll en móvil
+            
+            const pos = getMousePos(e);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 25, 0, Math.PI * 2); // Pincel
+            ctx.fill();
+        }
+
+        function checkReveal() {
+            if (isRevealed) return;
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let clearPixels = 0;
+            
+            // Revisar 1 de cada 256 pixeles para ser súper rápidos
+            for (let i = 0; i < imageData.data.length; i += 1024) {
+                if (imageData.data[i + 3] === 0) clearPixels++; 
+            }
+            
+            const totalPixelsChecked = imageData.data.length / 1024;
+            const clearPercentage = clearPixels / totalPixelsChecked;
+            
+            // Si borró más del 35%, animamos la revelación completa
+            if (clearPercentage > 0.35) {
+                isRevealed = true;
+                canvas.style.transition = 'opacity 0.6s ease';
+                canvas.style.opacity = '0';
+                
+                setTimeout(() => {
+                    canvas.style.display = 'none';
+                    btnResetScratch.style.display = 'block'; // Mostrar botón de jugar de nuevo
+                    confetti({
+                        particleCount: 80,
+                        spread: 70,
+                        origin: { y: 0.7 },
+                        colors: ['#ffd700', '#ffb6b9', '#ffffff'] // Dorado y rosa
+                    });
+                }, 600);
+            }
+        }
+
+        // Eventos para Desktop
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', scratch);
+        window.addEventListener('mouseup', stopDrawing);
+
+        // Eventos para Móvil
+        canvas.addEventListener('touchstart', startDrawing, {passive: false});
+        canvas.addEventListener('touchmove', scratch, {passive: false});
+        window.addEventListener('touchend', stopDrawing);
+    }
+
+</script>
+</body>
+</html>
